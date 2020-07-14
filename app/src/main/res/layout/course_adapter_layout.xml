@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/iv_photo"
+        android:layout_width="@dimen/dp_120"
+        android:layout_height="@dimen/dp_74"
+        android:layout_margin="@dimen/dp_12"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_marginLeft="@dimen/dp_12"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/dp_12"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="@color/fontColorDeep"
+        android:textSize="@dimen/sp_16"
+        android:visibility="visible"
+        app:layout_constraintLeft_toRightOf="@+id/iv_photo"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_photo" />
+
+    <android.widget.TextView
+        android:id="@+id/tv_learn_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_people_count"
+        android:drawablePadding="4dp"
+        android:layout_marginTop="@dimen/dp_5"
+        android:textColor="@color/fontColorGray"
+        android:textSize="@dimen/sp_12"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <android.widget.TextView
+        android:id="@+id/tv_like_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_like"
+        android:drawablePadding="4dp"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:textColor="@color/fontColorGray"
+        android:textSize="@dimen/sp_12"
+        app:layout_constraintLeft_toRightOf="@+id/tv_learn_num"
+        app:layout_constraintTop_toTopOf="@+id/tv_learn_num" />
+
+    <android.widget.TextView
+        android:id="@+id/tv_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimaryRed"
+        android:textSize="@dimen/sp_14"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_photo"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_title" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_0_5"
+        android:layout_marginTop="@dimen/dp_12"
+        app:layout_constraintTop_toBottomOf="@+id/iv_photo"
+        android:background="@color/divider"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aandroid="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/dp_10">
+
+    <com.teach.teach1907.view.design.RoundImage
+        android:id="@+id/avater"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"
+        android:src="@drawable/default_head"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.widget.TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:maxLines="1"
+        android:text="name"
+        android:textColor="@color/colorGray999"
+        android:textSize="@dimen/sp_14"
+        app:layout_constraintLeft_toRightOf="@+id/avater"
+        app:layout_constraintTop_toTopOf="@+id/avater" />
+
+    <android.widget.TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="start"
+        android:singleLine="true"
+        android:text="time"
+        android:textColor="@color/colorGray999"
+        android:textSize="@dimen/sp_12"
+        app:layout_constraintBottom_toBottomOf="@+id/name"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/name" />
+
+    <com.teach.teach1907.view.design.RatingBar
+        android:id="@+id/rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dp_2"
+        app:clickable="false"
+        app:layout_constraintBottom_toBottomOf="@+id/avater"
+        app:layout_constraintLeft_toLeftOf="@+id/name"
+        app:starCount="5"
+        app:starEmpty="@drawable/ic_empty_star"
+        app:starFill="@drawable/ic_full_star"
+        app:starHalf="@drawable/ic_half_star"
+        app:starImageHeight="15dp"
+        app:starImagePadding="3dp"
+        app:starImageWidth="15dp" />
+
+    <com.teach.teach1907.view.design.AutoLineFeedLayout
+        android:id="@+id/afl_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        app:layout_goneMarginLeft="@dimen/dp_6"
+        android:visibility="visible"
+        app:horizontal_Space="10dp"
+        app:isFull="false"
+        app:grivate="left"
+        app:layout_constraintRight_toRightOf="@id/time"
+        app:layout_constraintLeft_toRightOf="@+id/avater"
+        android:layout_marginLeft="@dimen/dp_5"
+        app:layout_constraintTop_toBottomOf="@+id/avater"
+        app:vertical_Space="5dp" />
+
+    <android.widget.TextView
+        android:id="@+id/content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:textColor="@color/fontColor333"
+        app:layout_constraintLeft_toLeftOf="@+id/name"
+        app:layout_constraintRight_toRightOf="@id/time"
+        app:layout_constraintTop_toBottomOf="@+id/afl_container" />
+
+    <TextView
+        android:id="@+id/reply_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/live_bg_shape"
+        android:padding="5dp"
+        android:textColor="@color/fontColor333"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@+id/name"
+        app:layout_constraintRight_toRightOf="@id/time"
+        app:layout_constraintTop_toBottomOf="@+id/content" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="@dimen/dp_60"
+        android:background="@color/colorGrayEEE"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reply_content" />
+</androidx.constraintlayout.widget.ConstraintLayout>

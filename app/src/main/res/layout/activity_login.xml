@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.activity.LoginActivity">
+
+    <ImageView
+        android:id="@+id/close_login"
+        android:layout_width="@dimen/dp_46"
+        android:layout_height="@dimen/dp_46"
+        android:layout_margin="@dimen/dp_13"
+        android:padding="@dimen/dp_17"
+        android:src="@mipmap/ic_close_gray"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/logo_image"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_logo_shadow"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/close_login" />
+
+    <com.teach.teach1907.view.design.LoginView
+        android:id="@+id/login_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:isMoreType="true"
+        app:layout_constraintTop_toBottomOf="@+id/logo_image" />
+
+    <TextView
+        android:id="@+id/register_press"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginRight="@dimen/dp_15"
+        android:text="注册新账号"
+        android:textSize="@dimen/sp_15"
+        app:layout_constraintRight_toLeftOf="@id/base_line"
+        app:layout_constraintTop_toBottomOf="@+id/login_view" />
+
+    <TextView
+        android:id="@+id/forgot_pwd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_15"
+        android:text="忘记密码"
+        android:textSize="@dimen/sp_15"
+        app:layout_constraintLeft_toRightOf="@+id/base_line"
+        app:layout_constraintTop_toTopOf="@+id/register_press" />
+
+    <View
+        android:id="@+id/base_line"
+        android:layout_width="@dimen/dp_1"
+        android:layout_height="@dimen/dp_1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ImageView
+        android:id="@+id/login_by_qq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/dp_15"
+        android:layout_marginBottom="@dimen/dp_30"
+        android:src="@mipmap/ic_qq_login"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/base_line" />
+
+    <ImageView
+        android:id="@+id/login_by_wx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_15"
+        android:layout_marginBottom="@dimen/dp_30"
+        android:src="@mipmap/ic_wx_login"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/base_line" />
+
+    <TextView
+        android:id="@+id/third_login_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dp_20"
+        android:text="第三方账号登录"
+        android:textColor="@color/dark_gray"
+        android:textSize="@dimen/sp_14"
+        app:layout_constraintBottom_toTopOf="@+id/login_by_qq"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <View
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_1"
+        android:layout_marginRight="@dimen/dp_15"
+        android:background="@color/gray_deep"
+        app:layout_constraintBottom_toBottomOf="@+id/third_login_desc"
+        app:layout_constraintRight_toLeftOf="@+id/third_login_desc"
+        app:layout_constraintTop_toTopOf="@+id/third_login_desc" />
+
+    <View
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_1"
+        android:layout_marginLeft="@dimen/dp_15"
+        android:background="@color/gray_deep"
+        app:layout_constraintBottom_toBottomOf="@+id/third_login_desc"
+        app:layout_constraintLeft_toRightOf="@+id/third_login_desc"
+        app:layout_constraintTop_toTopOf="@+id/third_login_desc" />
+</androidx.constraintlayout.widget.ConstraintLayout>

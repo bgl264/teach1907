@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 线下Url -->
+    <string name="off_bbs_url">http://newgroup.zhulong.com/</string>
+    <string name="off_photo_url">http://testphoto.zhulong.com/</string>
+    <string name="off_message">http://testmessage.zhulong.com/</string>
+    <string name="off_passport">http://testpassport.zhulong.com/</string>
+    <string name="off_weibo">http://testwb4.zhulong.com/</string>
+    <string name="off_edu_url">http://testedu.zhulong.com/</string>
+    <string name="off_secrectKey_passport">test123</string>
+    <string name="off_secrectKey_posting">test123</string>
+    <string name="off_secrectKey_weibo4a">dq(c!mf5</string>
+    <string name="off_secrectKey_message">test123</string>
+    <string name="off_blog_api">http://testblog2.zhulong.com/api/</string>
+    <string name="off_s_api">http://s.zhulong.com/</string> //线下暂无，待补充
+    <!--<string name="off_websocket_connect_api">ws://testedu.zhulong.com:7272</string>-->
+    <!--手机端线下WebSocket用这个地址-->
+    <string name="off_websocket_connect_api">ws://ws.edu.zhulong.com:7272</string>
+</resources>

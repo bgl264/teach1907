@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tl="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <RelativeLayout
+                android:id="@+id/video_bg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/image"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/dp_200"
+                    android:scaleType="centerCrop"
+                    app:layout_collapseMode="parallax" />
+
+                <ImageView
+                    android:id="@+id/play"
+                    android:layout_width="@dimen/dp_55"
+                    android:layout_height="@dimen/dp_55"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/start_video_image" />
+            </RelativeLayout>
+
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+
+                <include layout="@layout/layout_lesson_header" />
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <com.flyco.tablayout.SlidingTabLayout
+            android:id="@+id/courseDetailSlideTab"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_46"
+            android:background="@color/color_white"
+            tl:tl_divider_padding="2dp"
+            tl:tl_indicator_color="@color/red_theme"
+            tl:tl_indicator_corner_radius="1.5dp"
+            tl:tl_indicator_height="3dp"
+            tl:tl_indicator_width="17dp"
+            tl:tl_indicator_width_equal_title="true"
+            tl:tl_tab_padding="12dp"
+            tl:tl_tab_space_equal="true"
+            tl:tl_textBold="SELECT"
+            tl:tl_textSelectColor="@color/red_theme"
+            tl:tl_textUnselectColor="@color/color_gray_text"
+            tl:tl_textsize="@dimen/sp_16" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <include layout="@layout/content_scrolling" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

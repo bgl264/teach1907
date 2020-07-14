@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <include layout="@layout/cut_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/top_line"/>
+    <ImageView
+        android:id="@+id/leftIcon"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="@dimen/dp_15"
+        android:src="@drawable/ic_directory_play"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/top_line" />
+
+    <TextView
+        android:id="@+id/tv_part_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:text="汉字"
+        android:textColor="@color/fontColor333"
+        app:layout_constraintBottom_toBottomOf="@+id/leftIcon"
+        app:layout_constraintLeft_toRightOf="@+id/leftIcon"
+        app:layout_constraintTop_toTopOf="@+id/leftIcon" />
+
+    <TextView
+        android:id="@+id/tv_free_study"
+        android:layout_width="42dp"
+        android:layout_height="18dp"
+        android:layout_marginLeft="8dp"
+        android:background="@drawable/shape_red_radius_25_bg"
+        android:gravity="center"
+        android:text="试学"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_12"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/leftIcon"
+        app:layout_constraintLeft_toRightOf="@id/tv_part_name"
+        app:layout_constraintTop_toTopOf="@id/leftIcon" />
+
+    <TextView
+        android:id="@+id/videoTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="time"
+        android:textColor="@color/colorGray999"
+        android:textSize="@dimen/sp_12"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_part_name"
+        app:layout_constraintTop_toBottomOf="@+id/tv_part_name" />
+    <TextView
+        android:id="@+id/videoSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorGray999"
+        android:textSize="@dimen/sp_12"
+        android:layout_marginLeft="@dimen/dp_15"
+        android:text="size"
+        app:layout_constraintBottom_toBottomOf="@+id/videoTime"
+        app:layout_constraintLeft_toRightOf="@+id/videoTime"
+        app:layout_constraintTop_toTopOf="@+id/videoTime" />
+    <TextView
+        android:id="@+id/study_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:text="study_progress"
+        android:textColor="@color/red2e"
+        android:textSize="@dimen/sp_12"
+        app:layout_constraintBottom_toBottomOf="@+id/videoTime"
+        app:layout_constraintLeft_toRightOf="@+id/videoSize"
+        app:layout_constraintTop_toTopOf="@+id/videoTime" />
+    <include layout="@layout/cut_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_marginTop="@dimen/dp_14"
+        android:id="@+id/bottom_line"
+        app:layout_constraintTop_toBottomOf="@+id/study_progress"/>
+    <com.teach.teach1907.view.design.DownLoadRoundProgressBar
+        android:id="@+id/DLR_ProgressBar"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginRight="15dp"
+       app:layout_constraintBottom_toBottomOf="@+id/bottom_line"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="visible"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,4 @@
+rootProject.name='teach1907'
+include ':app', ':utils', ':basepop'
+include ':frame'
+include ':data'

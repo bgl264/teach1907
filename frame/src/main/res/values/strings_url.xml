@@ -1,0 +1,44 @@
+<resources>
+
+    <string name="rsa_public">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCrWVnSOu9m7O8X3taQGXzVlB9B0Gw1Mvbc0MxKZOxT8SlQVB1Krpu3KfuoxgGE1TikX/JkYJf+D4tTqENqk5pnSZc784gWZPEs2O+uz5R/8Ay8qP06uHDzw1oGDrpo8wxWQ7Ae2IwE2gTDtpcyg8NUJp14uYwsvA47iDpXHGmPxQIDAQAB</string>
+    <!-- 线上Url -->
+    <string name="bbs_url">https://bbs.zhulong.com/</string>
+    <string name="bbs_api">https://bbs.zhulong.com/api/</string>
+    <string name="bbs_openapi">https://bbs.zhulong.com/openapi/</string>
+    <string name="webrule_url">https://news.zhulong.com/webrule.txt</string>
+    <string name="upload_photo">https://f.zhulong.com/uploadZhulongImgForEdit.php</string>
+    <string name="message">https://message.zhulong.com/</string>
+    <string name="message_api">https://message.zhulong.com/api/</string>
+    <string name="message_openapi">https://message.zhulong.com/openapi/</string>
+    <string name="passport">https://passport.zhulong.com/</string>
+    <string name="passport_api">https://passport.zhulong.com/api/</string>
+    <string name="passport_openapi">https://passport.zhulong.com/openapi/</string>
+    <string name="weibo">https://t.zhulong.com/</string>
+    <string name="weibo_api">https://t.zhulong.com/api/</string>
+    <string name="weibo_openapi">https://t.zhulong.com/openapi/</string>
+    <string name="edu_url">https://edu.zhulong.com/</string>
+    <string name="edu_api">https://edu.zhulong.com/api/</string>
+    <string name="edu_openapi">https://edu.zhulong.com/openapi/</string>
+    <string name="secrectKey">123^*)asdf</string>
+    <string name="secrectKey_passport">1f^fM&amp;42</string>
+    <string name="secrectKey_posting">Bp*(^m12</string>
+    <string name="secrectKey_weibo4a">dq(c!mf5</string>
+    <string name="secrectKey_message">test123</string>
+    <string name="passport_openapi_user">https://passport.zhulong.com/openapi/user/</string>
+    <string name="blog_api">https://blog.zhulong.com/api/</string>
+    <string name="s_url">https://s.zhulong.com/</string>
+    <string name="topic_openapi">https://s.zhulong.com/api/bbs</string>
+    <string name="info_openapi">https://s.zhulong.com/api/info</string>
+    <string name="all_openapi">https://s.zhulong.com/api/all</string>
+    <string name="payment_agreement_api">https://m.edu.zhulong.com/xieyi/eduxy.html?is_app=1</string>
+    <string name="e_payment_agreement_api">https://passport.zhulong.com/score/exy</string>
+    <string name="websocket_connect_api">ws://ws.edu.zhulong.com:7272</string>
+    <string name="aes_key">U1MjU1M0FDOUZ.Qz</string>
+    <string name="ad_openapi">https://a.zhulong.com/openapi/</string>
+    <string name="foolow_list_openapi">https://bbs.zhulong.com/openapi/thread/</string>
+    <string name="vip_list_openapi">https://edu.zhulong.com/openapi/lesson/</string>
+    <string name="fx_openapi">https://fx.zhulong.com/openapi/</string>
+    <string name="photo_url">https://photo.zhulong.com/</string>
+    <string name="photo_openapi">https://photo.zhulong.com/openapi/</string>
+
+</resources>

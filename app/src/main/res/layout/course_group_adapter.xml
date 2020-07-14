@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/groupName"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/colorGrayEEE"
+        android:gravity="center_vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="10dp"
+        android:singleLine="true"
+        android:text="srl_content_empty"
+        android:textColor="@color/fontColorDeep"
+        android:textSize="@dimen/sp_15"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_collapsed"
+        android:layout_width="18dp"
+        android:layout_height="9dp"
+        android:layout_marginRight="15dp"
+        android:src="@drawable/ic_lesson_collapsed"
+        app:layout_constraintBottom_toBottomOf="@+id/groupName"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/groupName" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/groupChildRecycle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/groupName" />
+</androidx.constraintlayout.widget.ConstraintLayout>

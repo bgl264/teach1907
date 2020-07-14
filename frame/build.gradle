@@ -1,0 +1,52 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "androidx.appcompat:appcompat:$androidXVsersion"
+    api "androidx.recyclerview:recyclerview:$androidXRecyclerView"
+    api "com.squareup.okhttp3:okhttp:$okhttp3"
+    api "com.squareup.okhttp3:logging-interceptor:$ok3log"
+    api "com.scwang.smartrefresh:SmartRefreshLayout:$smartRefresh"
+    api "com.scwang.smartrefresh:SmartRefreshHeader:$smartRefresh"
+    api "com.squareup.retrofit2:retrofit:$retrofit2"
+    api "com.squareup.retrofit2:converter-gson:$retrofit2"
+    api "com.squareup.retrofit2:adapter-rxjava2:$retrofit2"
+    api "io.reactivex.rxjava2:rxjava:$rxjava2"
+    api "io.reactivex.rxjava2:rxandroid:$rxjava2"
+    api "com.github.bumptech.glide:glide:$glide"
+    api 'com.android.support:design:29.0.6'
+    api project(path: ':data')
+    api project(path: ':utils')
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+
