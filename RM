@@ -1,0 +1,30 @@
+public class RearviewManagement {
+    private static final String TAG = "RearviewManagement";
+
+    private RearviewManagement() {
+    }
+
+    public static boolean isSupportedRearviewFolding() {
+        LogUtils.info("RearviewManagement", "Enter isSupportedRearviewFolding");
+        return VehicleConfigurationWord.getSingleConfigurationValue("rearview_folding") == 1;
+    }
+
+    public static RearviewSwitchEnum getRearviewFoldSwitchType() {
+        LogUtils.info("RearviewManagement", "Enter getRearviewFoldSwitchType");
+        int wordValue = VehicleConfigurationWord.getSingleConfigurationValue("rearview_fold_switch_type");
+        Optional<Object> obj = BaseCfg.getEnumByValue(RearviewSwitchEnum.class, wordValue);
+        return obj.isPresent() && obj.get() instanceof RearviewSwitchEnum ? (RearviewSwitchEnum)obj.get() : RearviewSwitchEnum.INVALID_FOLD_SWITCH_ENUM;
+    }
+
+    public static RearviewFoldTypeEnum getRearviewFoldType() {
+        LogUtils.info("RearviewManagement", "Enter getRearviewFoldType");
+        int wordValue = VehicleConfigurationWord.getSingleConfigurationValue("rearview_fold_type");
+        Optional<Object> obj = BaseCfg.getEnumByValue(RearviewFoldTypeEnum.class, wordValue);
+        return obj.isPresent() && obj.get() instanceof RearviewFoldTypeEnum ? (RearviewFoldTypeEnum)obj.get() : RearviewFoldTypeEnum.INVALID_REARVIEW_FOLD_ENUM;
+    }
+
+    public static boolean isSupportedElectronicRearview() {
+        LogUtils.info("RearviewManagement", "Enter isSupportedElectronicRearview.");
+        return VehicleConfigurationWord.getSingleConfigurationValue("electric_rearview") == 1;
+    }
+}
