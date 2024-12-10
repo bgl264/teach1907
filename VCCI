@@ -1,0 +1,76 @@
+public class VhsCarControlInfo {
+    /**
+     * 原始命令
+     */
+    private CommandBean command = new CommandBean("", new JsonObject(), 0);
+
+    /**
+     * 原始命令消息
+     */
+    private CommandMessageBean message = new CommandMessageBean("", "", "");
+
+    /**
+     * 北向调节方向
+     */
+    private MirrorControlManager.AdjustDirection direction = MirrorControlManager.AdjustDirection.UP;
+
+    /**
+     * 后视镜调节区域(左/右)
+     */
+    private MirrorManager.MirrorZone zoneId = MirrorManager.MirrorZone.LEFT;
+
+    /**
+     * 调节数值
+     */
+    private int number = 0;
+
+    /**
+     * 调节当前值
+     */
+    private int current = 0;
+
+    /**
+     * 调节目标值
+     */
+    private int target = 0;
+
+    /**
+     * 调节索引
+     */
+    private int adjustKey = 0;
+
+    /**
+     * 是相对调节吗
+     */
+    private boolean isRelativeAdjust = true;
+
+    /**
+     * 回复话术
+     */
+    private ReplyBean result = new ReplyBean();
+
+    /**
+     * 边界位置的播报话术
+     */
+    private String borderRetcode = "";
+
+    /**
+     * 是否处于边界位置
+     */
+    private Boolean isBorderScene = false;
+
+    public VhsCarControlInfo chainingCurrent(int val){
+        current = val;
+        return this;
+    }
+
+    public VhsCarControlInfo chainingTarget(int val){
+        target = val;
+        return this;
+    }
+
+    public VhsCarControlInfo chainingAdjustKey(int val){
+        adjustKey = val;
+        return this;
+    }
+}
