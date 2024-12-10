@@ -1,0 +1,955 @@
+public class MirrorControlManager implements IVhsManager {
+    private static final String TAG = "MirrorControlManager";
+
+    public static final int MIRROR_ADJUST_MIN_VALUE = 0;
+
+    public static final int MIRROR_ADJUST_MAX_VALUE = 100;
+
+    private static final int RET_TIME_LIMIT = 200;
+
+    private static final int NO_CHOOSE = 0;
+
+    private static final int FOLDED = 1;
+
+    private static long historyRetTime = 0;
+
+    /**
+     * 调节误差
+     */
+    private static int mirrorAdjustMinimumStep = 3;
+
+    /**
+     * 调节步长
+     */
+    private static int mirrorAdjustStep = 4;
+
+    /**
+     * 左后视镜和右后视镜的水平方向定义是否一致
+     */
+    private static boolean zoneDirectionConsistencyHorizontal = true;
+
+    /**
+     * 后视镜的水平方向定义是否与X2一致
+     */
+    private static boolean directionUnifiedHorizontal = false;
+
+    /**
+     * 后视镜的竖直方向定义是否与X2一致
+     */
+    private static boolean directionUnifiedVertical = false;
+
+    /**
+     * 后视镜调节数值是否被可调节范围限制
+     */
+    private static boolean valueLimited = false;
+
+    /**
+     * X轴、Y轴是否需要沿法线旋转标准化
+     */
+    private static boolean XYNormalize = false;
+
+    /**
+     * 是否需要并行信号
+     */
+    private static boolean parallelSignal = false;
+
+    /**
+     * 方向向上时的可调节范围限制
+     */
+    private static int toleranceUp = 0;
+
+    /**
+     * 方向向下时的可调节范围限制
+     */
+    private static int toleranceDown = 0;
+
+    /**
+     * 方向向左时的可调节范围限制
+     */
+    private static int toleranceLeft = 0;
+
+    /**
+     * 方向向右时的可调节范围限制
+     */
+    private static int toleranceRight = 0;
+
+    /**
+     * 无效的结果值
+     */
+    private static final int INVALID_NUMBER = -1;
+
+    private Integer transmissionGear;
+
+
+
+    /**
+     * 后视镜位置记忆键
+     */
+    private static final String CAR_CONTROL_LEFT_X = "leftRearViewMirrorXPosition";
+    private static final String CAR_CONTROL_LEFT_Y = "leftRearviewMirrorYPosition";
+    private static final String CAR_CONTROL_RIGHT_X = "rightRearViewMirrorXPosition";
+    private static final String CAR_CONTROL_RIGHT_Y = "rightRearViewMirrorYPosition";
+
+    private static final int CONSTANT_ZERO = 0;
+
+    private static final int SINGLE_COMMAND_RESULT_SIZE = 1;
+
+    private static final int MAX_SAME_RET_CODE_COUNT = 2;
+
+    /**
+     * 左后视镜X
+     */
+    public static final int MIRROR_LEFT_X = 0;
+
+    /**
+     * 左后视镜Y
+     */
+    public static final int MIRROR_LEFT_Y = 1;
+
+    /**
+     * 右后视镜X
+     */
+    public static final int MIRROR_RIGHT_X = 2;
+
+    /**
+     * 右后视镜Y
+     */
+    public static final int MIRROR_RIGHT_Y = 3;
+
+    /**
+     * 账户下保存后视镜位置URI
+     */
+    public static final String USER_MIRROR_SAVE_URI = "content://com.huawei.hwcarcontrol.provider.seatrearview/13";
+
+    private static final Map<Integer, AdjustDirection> adjustDirectionMessageMap = new HashMap<>();
+
+    {
+        adjustDirectionMessageMap.put(CarControlMessageConstant.Direction.UP, AdjustDirection.UP);
+        adjustDirectionMessageMap.put(CarControlMessageConstant.Direction.DOWN, AdjustDirection.DOWN);
+        adjustDirectionMessageMap.put(CarControlMessageConstant.Direction.LEFT, AdjustDirection.LEFT);
+        adjustDirectionMessageMap.put(CarControlMessageConstant.Direction.RIGHT, AdjustDirection.RIGHT);
+    }
+
+    private static final Map<AdjustDirection, AdjustDirection> oppositeDirectionMap = new HashMap<>();
+
+    {
+        oppositeDirectionMap.put(AdjustDirection.UP, AdjustDirection.DOWN);
+        oppositeDirectionMap.put(AdjustDirection.DOWN, AdjustDirection.UP);
+        oppositeDirectionMap.put(AdjustDirection.LEFT, AdjustDirection.RIGHT);
+        oppositeDirectionMap.put(AdjustDirection.RIGHT, AdjustDirection.LEFT);
+    }
+
+    private static final Map<String, String> oppositeRetCodeMap = new HashMap<>();
+
+    {
+        oppositeRetCodeMap.put(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN, MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX);
+        oppositeRetCodeMap.put(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX, MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN);
+    }
+
+    private static final Map<Integer, Integer> positionMap = new HashMap<>();
+
+    {
+        positionMap.put(HEAD_POSE_LEFT, LF);
+        positionMap.put(HEAD_POSE_RIGHT, RF);
+    }
+
+    private static final Map<AdjustDirection, Integer> toleranceMap = new HashMap<>();
+
+    {
+        toleranceMap.put(MirrorControlManager.AdjustDirection.UP, toleranceUp);
+        toleranceMap.put(MirrorControlManager.AdjustDirection.DOWN, toleranceDown);
+        toleranceMap.put(MirrorControlManager.AdjustDirection.LEFT, toleranceLeft);
+        toleranceMap.put(MirrorControlManager.AdjustDirection.RIGHT, toleranceRight);
+    }
+
+    private static Map<Integer, Integer> adjustKeyAndTargetMap = new ConcurrentHashMap<>();
+
+    /**
+     * 水平方向
+     */
+    private static final List<AdjustDirection> horizontalDirections = Arrays.asList(AdjustDirection.RIGHT, AdjustDirection.LEFT);
+
+    /**
+     * 竖直方向
+     */
+    private static final List<AdjustDirection> verticalDirections = Arrays.asList(AdjustDirection.UP, AdjustDirection.DOWN);
+
+    /**
+     * 位置类调节指令
+     */
+    private static final List<String> adjustPositionIntentNames = Arrays.asList(CARCONTROL_SET_HEIGHT,
+            CARCONTROL_INC_HEIGHT, CARCONTROL_DEC_HEIGHT, CARCONTROL_SET_HORIZONTAL,
+            CARCONTROL_INC_HORIZONTAL, CARCONTROL_DEC_HORIZONTAL);
+
+    /**
+     * 绝对调节指令
+     */
+    private static final List<String> absoluteAdjustIntentNames = Arrays.asList(CARCONTROL_SET_HORIZONTAL,
+            CARCONTROL_SET_HEIGHT);
+
+    private static final SetCallback setCallback = (zoneId, errorCode) -> {
+        historyRetTime = System.currentTimeMillis();
+        LogUtil.warn(TAG,
+                "[setCallback] error signal zoneId=" + zoneId + ", errorCode=" + errorCode);
+    };
+
+    /**
+     * 获取MirrorControlManager实例
+     *
+     * @return MirrorControlManager实例
+     */
+    public static MirrorControlManager getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
+
+    @Override
+    public boolean isValidCommand(CommandBean command, CommandMessageBean message) {
+        String intentName = command.getIntentName();
+        JsonObject slots = command.getSlots();
+        if (slots.has(CarControlConstant.SlotName.DEVICE_TYPE)) {
+            if (!REAR_VIEW_MIRROR.equals(slots.get(CarControlConstant.SlotName.DEVICE_TYPE).getAsString())) {
+                LogUtil.info(TAG, "isValidCommand false");
+                return false;
+            }
+        }
+        return adjustPositionIntentNames.contains(intentName);
+    }
+
+    @Override
+    public void executeCommand(CommandBean command, CommandMessageBean message) {
+        command.getResult().setFailureType(ReplyConstant.RetCode.SUCCESS);
+        JsonObject params = message.getParameters();
+        List<VhsCarControlInfo> replyBeans = new ArrayList<>();
+        LogUtil.info(TAG, "original params:" + params.toString());
+        VhsCarControlInfo vhsBean = new VhsCarControlInfo();
+        //每次使用前清空上次的数据
+        adjustKeyAndTargetMap.clear();
+
+        if (!generalInterceptor(command, message)) return;
+
+        vhsBean.setCommand(command);
+        vhsBean.setMessage(message);
+
+        //初始化状态
+        transmissionGear = null;
+
+        // 解析调节位置
+        List<MirrorZone> mirrorZones = parsePosition(vhsBean);
+
+        for (MirrorZone mirrorZone : mirrorZones) {
+
+            VhsCarControlInfo vhsBeanTmp = getCopyOfVhsBean(vhsBean);
+
+            // 设置调节位置
+            vhsBeanTmp.setZoneId(mirrorZone);
+
+            // 解析调节方向
+            vhsBeanTmp.setDirection(parseDirection(vhsBeanTmp));
+
+            // 解析调节数值
+            vhsBeanTmp.setNumber(parseValue(vhsBeanTmp));
+
+            vhsBeanTmp.getResult().setPosition(vhsBeanTmp.getZoneId().getNumber());
+
+            // 后视镜调节
+            performVhsAdjust(vhsBeanTmp);
+
+            vhsBeanTmp.setResult(vhsBeanTmp.getResult());
+
+            replyBeans.add(vhsBeanTmp);
+        }
+
+        // 执行多个后视镜操作时，选择使用哪个执行结果
+        vhsBean = multiResultDecision(replyBeans, vhsBean);
+
+        generateCommandResult(command, vhsBean);
+    }
+
+    private boolean generalInterceptor(CommandBean command, CommandMessageBean message) {
+        //语音暂不支持电子后视镜微调
+        //if (isElectronicRearview(command)) return false;
+
+        //后视镜调节页面打开时，播报请手动调节后视镜
+        if (isAdjustPageOpened(command)) return false;
+
+        //折叠状态下不支持微调
+        if (isMirrorFolded(command)) return false;
+
+        //语音支持电子后视镜调节
+        if(isElectronicRearview(command)) return true;
+
+        //语音暂不支持向前|后调节后视镜
+        if (isAdjustFrontOrBcak(command, message)) return false;
+
+        return true;
+    }
+
+    //语音暂不支持电子后视镜微调
+    private static boolean isElectronicRearview(CommandBean command) {
+        boolean isElectronicRearview = RearviewManagement.isSupportedElectronicRearview();
+        if (isElectronicRearview) {
+            ControlManagerUtil.setResult(command, CarControlConstant.ErrorSource.CONFIG_NOT_SUPPORT,
+                    ReplyConstant.RetCode.VOICE_CONTROL_UNSUPPORTED);
+            LogUtil.info(TAG, "generalInterceptor support isElectronicRearview: " + isElectronicRearview);
+            return true;
+        }
+        return false;
+    }
+
+    //后视镜调节页面打开时，播报请手动调节后视镜
+    private static boolean isAdjustPageOpened(CommandBean command) {
+        int sideMirrorAdjustmentStatus = INVALID_NUMBER;
+        try {
+            sideMirrorAdjustmentStatus = MirrorManager.getInstance().getSideMirrorAdjustmentStatus();
+        } catch (VehicleServiceException | RemoteException ex) {
+            ControlManagerUtil.setResult(command, CarControlConstant.ErrorSource.EXCEPTION,
+                    ReplyConstant.RetCode.EXCEPTION);
+            LogUtil.error(TAG, "generalInterceptor call VHS exception: " + ex.getMessage());
+            return true;
+        }
+        if (sideMirrorAdjustmentStatus != NO_CHOOSE) {
+            ControlManagerUtil.setResult(command, CarControlConstant.ErrorSource.CONDITION_NOT_SATISFIED,
+                    ReplyConstant.RetCode.NOT_SUPPORT_ADJUST_CURRENT);
+            LogUtil.info(TAG, "generalInterceptor support sideMirrorAdjustmentStatus: " + sideMirrorAdjustmentStatus);
+            return true;
+        }
+        return false;
+    }
+
+    //折叠状态下不支持微调
+    private static boolean isMirrorFolded(CommandBean command) {
+        int sideMirrorFoldStatus;
+        try {
+            sideMirrorFoldStatus = MirrorManager.getInstance().getSideMirrorFoldStatus();
+        } catch (VehicleServiceException | RemoteException ex) {
+            ControlManagerUtil.setResult(command, CarControlConstant.ErrorSource.EXCEPTION,
+                    ReplyConstant.RetCode.EXCEPTION);
+            LogUtil.error(TAG, "generalInterceptor call VHS exception: " + ex.getMessage());
+            return true;
+        }
+        if (sideMirrorFoldStatus == FOLDED) {
+            ControlManagerUtil.setResult(command, CarControlConstant.ErrorSource.CONDITION_NOT_SATISFIED,
+                    ReplyConstant.RetCode.MIRROR_NONSUPPORT_ADJUST_WHILE_FOLDED);
+            LogUtil.info(TAG, "generalInterceptor mirror is folded");
+            return true;
+        }
+        return false;
+    }
+
+    //语音暂不支持向前|后调节后视镜
+    private static boolean isAdjustFrontOrBcak(CommandBean command, CommandMessageBean message) {
+        JsonObject params = message.getParameters();
+        if (!params.has("direction")) return false;
+        int direction = INVALID_NUMBER;
+        JsonObject jsonObject = params.get("direction").getAsJsonObject();
+        if (jsonObject.has("value")) {
+            direction = NumberUtils.parseInt(jsonObject.get("value").getAsString(), 0);
+        }
+        if (direction == CarControlMessageConstant.Direction.FRONT || direction == CarControlMessageConstant.Direction.BACK) {
+            ControlManagerUtil.setResult(command, CarControlConstant.ErrorSource.CONFIG_NOT_SUPPORT,
+                    ReplyConstant.RetCode.VOICE_CONTROL_UNSUPPORTED);
+            LogUtil.info(TAG, "generalInterceptor rear mirror not support adjust forward or backward");
+            return true;
+        }
+        return false;
+    }
+
+    private static VhsCarControlInfo getCopyOfVhsBean(VhsCarControlInfo vhsBean) {
+        VhsCarControlInfo newVhsBean = new VhsCarControlInfo();
+        newVhsBean.setCommand(vhsBean.getCommand());
+        newVhsBean.setMessage(vhsBean.getMessage());
+        return newVhsBean;
+    }
+
+    /**
+     * @param commandResults
+     * @return
+     */
+    private VhsCarControlInfo multiResultDecision(List<VhsCarControlInfo> commandResults, VhsCarControlInfo vhsBean) {
+        ReplyBean commandResult = new ReplyBean();
+        if (commandResults.isEmpty()) {
+            LogUtil.error(TAG, "Result Decision Error, No Result");
+            commandResult.setRetCode(String.valueOf(EXCEPTION));
+            commandResult.setPosition(ALL);
+            vhsBean.setResult(commandResult);
+            return vhsBean;
+        }
+        VhsCarControlInfo firstFhsCarControlInfo = commandResults.get(CONSTANT_ZERO);
+        if (commandResults.size() == SINGLE_COMMAND_RESULT_SIZE) {
+            // 单条执行结果直接采用
+            return firstFhsCarControlInfo;
+        }
+        Stream<VhsCarControlInfo> resultStreamGeneralSuccess =
+                commandResults.stream().filter(result -> Objects.equals(result.getResult().getRetCode(), Integer.toString(ReplyConstant.RetCode.SUCCESS)));
+        long countGeneralSuccess = resultStreamGeneralSuccess.count();
+        // 所有执行结果都返回0
+        if (countGeneralSuccess == commandResults.size()) {
+            // 全部执行成功
+            LogUtil.info(TAG, "all commands success");
+            return firstFhsCarControlInfo;
+        }
+        // 有位置执行结果返回0
+        if (countGeneralSuccess > CONSTANT_ZERO) {
+            LogUtil.info(TAG, "has success command");
+            commandResult.setRetCode(Integer.toString(ReplyConstant.RetCode.SUCCESS));
+            commandResult.setPosition(ALL);
+            firstFhsCarControlInfo.setResult(commandResult);
+            return firstFhsCarControlInfo;
+        }
+        // 所有单个设备都返回非0
+        VhsCarControlInfo lastResult = null;
+        for (VhsCarControlInfo result : commandResults) {
+            if (lastResult == null) {
+                lastResult = result;
+                continue;
+            }
+            if (!Objects.equals(result.getResult().getRetCode(), lastResult.getResult().getRetCode())) {
+                // 所有单个设备都返回非0，且这些返回码不同
+                result.getResult().setRetCode(Integer.toString(ReplyConstant.RetCode.EXCEPTION));
+                LogUtil.info(TAG, "results all not success");
+                return result;
+            }
+        }
+        // 所有单个设备都返回非0
+        // 特殊场景码优先级高于通用异常场景码
+        return getVhsCarControlInfo(commandResults, firstFhsCarControlInfo);
+    }
+
+    private static VhsCarControlInfo getVhsCarControlInfo(List<VhsCarControlInfo> commandResults, VhsCarControlInfo vhsCarControlInfo) {
+        boolean isSameRetCode = commandResults.stream()
+                .map(VhsCarControlInfo::getResult)
+                .map(ReplyBean::getRetCode)
+                .distinct()
+                .limit(MAX_SAME_RET_CODE_COUNT)
+                .count() <= SINGLE_COMMAND_RESULT_SIZE;
+        if (isSameRetCode) {
+            // 所有返回非0，且返回码相同
+            LogUtil.info(TAG, "resultCode is same");
+            vhsCarControlInfo.getResult().setPosition(ALL);
+            return vhsCarControlInfo;
+        }
+        VhsCarControlInfo firstFhsCarControlInfo = commandResults.get(CONSTANT_ZERO);
+        VhsCarControlInfo vhsBean = firstFhsCarControlInfo;
+        vhsBean.getResult().setRetCode(Integer.toString(ReplyConstant.RetCode.EXCEPTION));
+        String longestRetCode = commandResults.stream()
+                .map(VhsCarControlInfo::getResult)
+                .map(ReplyBean::getRetCode)
+                .max(Comparator.comparingInt(String::length))
+                .orElse("");
+        return commandResults.stream()
+                .filter(result -> Objects.equals(result.getResult().getRetCode(), longestRetCode))
+                .findFirst()
+                .orElseGet((Supplier<? extends VhsCarControlInfo>) vhsBean);
+    }
+
+    /**
+     * 回填调节结果
+     */
+    private static void generateCommandResult(CommandBean command, VhsCarControlInfo vhsBean) {
+        ReplyBean result = vhsBean.getResult();
+        command.getResult().setRetCode(NumberUtils.parseInt(result.getRetCode(), ReplyConstant.RetCode.EXCEPTION));
+        JsonObject responseDataJson = new JsonObject();
+        String deviceName = "";
+        if (result.getPosition() == MirrorZone.LEFT.getNumber()) {
+            deviceName = ContextUtil.getAppContext().getResources().getString(com.huawei.voice.composer.R.string.the_left_rearviewMirror);
+        } else if (result.getPosition() == MirrorZone.RIGHT.getNumber()) {
+            deviceName = ContextUtil.getAppContext().getResources().getString(com.huawei.voice.composer.R.string.the_right_rearviewMirror);
+        } else {
+            deviceName = ContextUtil.getAppContext().getResources().getString(com.huawei.voice.composer.R.string.the_both_rearviewMirror);
+        }
+        if (!StringUtils.isEmpty(deviceName)) {
+            responseDataJson.addProperty("carstate.deviceType", deviceName);
+        }
+        command.getResult().setResponseData(responseDataJson.toString());
+        if (String.valueOf(ReplyConstant.RetCode.SUCCESS).equals(result.getRetCode()) && MultiModalCarControlManager.isMultiModalActive() && !StringUtils.isEmpty(deviceName)) {
+            String speakText = ContextUtil.getAppContext().getResources().getString(com.huawei.voice.composer.R.string.adjust_device_success);
+            command.getResult().setSpeakText(String.format(speakText, deviceName));
+        }
+        try {
+            TimeUnit.MILLISECONDS.sleep(RET_TIME_LIMIT);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long currentRetTime = System.currentTimeMillis();
+        if (currentRetTime - historyRetTime <= RET_TIME_LIMIT) {
+            command.getResult().setRetCode(ReplyConstant.RetCode.EXCEPTION);
+        }
+        LogUtil.info(TAG, "[generateCommandResult] finish add commandResult");
+    }
+
+    /**
+     * 解析调节位置
+     */
+    private static List<MirrorZone> parsePosition(VhsCarControlInfo vhsBean) {
+        CommandMessageBean message = vhsBean.getMessage();
+        JsonObject params = message.getParameters();
+        List<MirrorZone> mirrorZones = new ArrayList<>();
+        int position = MultiModalCarControlManager.getFinalHeadPose();
+        if (params.has("position")) {
+            try {
+                position = params.get("position").getAsJsonObject().get("value").getAsInt();
+            } catch (IllegalStateException e) {
+                LogUtil.warn(TAG, "parse position fail with exception: " + e.getMessage());
+            }
+        } else {
+            position = positionMap.getOrDefault(position, LF);
+        }
+        if (MultiModalCarControlManager.isMultiModalActive()) {
+            position = MultiModalCarControlManager.getFinalHeadPose();
+        }
+
+        if (position == LF || position == L) {
+            mirrorZones.add(MirrorZone.LEFT);
+        } else if (position == RF || position == R) {
+            mirrorZones.add(MirrorZone.RIGHT);
+        } else if (position == ALL) {
+            mirrorZones.add(MirrorZone.LEFT);
+            mirrorZones.add(MirrorZone.RIGHT);
+        } else {
+            mirrorZones.add(MirrorZone.LEFT);
+        }
+        return mirrorZones;
+    }
+
+    /**
+     * 解析调节方向
+     */
+    private static AdjustDirection parseDirection(VhsCarControlInfo vhsBean) {
+        MirrorZone zoneId = vhsBean.getZoneId();
+        CommandBean command = vhsBean.getCommand();
+        AdjustDirection direction = parseSpecificDirection(vhsBean);
+
+        if (horizontalDirections.contains(direction) && !directionUnifiedHorizontal) {
+            direction = oppositeDirectionMap.getOrDefault(direction, direction);
+        } else if (verticalDirections.contains(direction) && !directionUnifiedVertical) {
+            direction = oppositeDirectionMap.getOrDefault(direction, direction);
+        }
+
+        if (XYNormalize) {
+            switch (direction) {
+                case UP:
+                    direction = AdjustDirection.LEFT;
+                    break;
+                case DOWN:
+                    direction = AdjustDirection.RIGHT;
+                    break;
+                case LEFT:
+                    direction = AdjustDirection.UP;
+                    break;
+                case RIGHT:
+                    direction = AdjustDirection.DOWN;
+                    break;
+                default:
+            }
+        }
+
+        if (!absoluteAdjustIntentNames.contains(command.getIntentName()) && !zoneDirectionConsistencyHorizontal && horizontalDirections.contains(direction)) {
+            if (zoneId == MirrorZone.RIGHT) {
+                direction = oppositeDirectionMap.getOrDefault(direction, direction);
+            }
+        }
+
+        return direction;
+    }
+
+    private static AdjustDirection parseSpecificDirection(VhsCarControlInfo vhsBean) {
+        CommandBean command = vhsBean.getCommand();
+        CommandMessageBean message = vhsBean.getMessage();
+        JsonObject params = message.getParameters();
+        MirrorZone zoneId = vhsBean.getZoneId();
+        AdjustDirection direction = AdjustDirection.INVALID;
+        if (params.has("direction")) {
+            int key = 0;
+            try {
+                key = NumberUtils.parseInt(params.get("direction").getAsJsonObject().get("value").getAsString(), 0);
+            } catch (IllegalStateException e) {
+                LogUtil.warn(TAG, "parse direction fail with exception: " + e.getMessage());
+            }
+            if (key == CarControlMessageConstant.Direction.IN) {
+                vhsBean.setBorderRetcode(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN);
+                if (zoneId == MirrorZone.LEFT) {
+                    key = CarControlMessageConstant.Direction.RIGHT;
+                } else {
+                    key = CarControlMessageConstant.Direction.LEFT;
+                }
+            } else if (key == CarControlMessageConstant.Direction.OUT) {
+                vhsBean.setBorderRetcode(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX);
+                if (zoneId == MirrorZone.LEFT) {
+                    key = CarControlMessageConstant.Direction.LEFT;
+                } else {
+                    key = CarControlMessageConstant.Direction.RIGHT;
+                }
+            }
+            direction = adjustDirectionMessageMap.getOrDefault(key, MirrorControlManager.AdjustDirection.LEFT);
+            LogUtil.info(TAG, "adjust mirror control direction key is:" + key + " direction is:" + direction);
+        } else if (CARCONTROL_DEC_HEIGHT.equals(command.getIntentName())) {
+            direction = AdjustDirection.DOWN;
+        } else if (CARCONTROL_INC_HEIGHT.equals(command.getIntentName())) {
+            direction = AdjustDirection.UP;
+        } else if (CARCONTROL_SET_HEIGHT.equals(command.getIntentName())) {
+            direction = AdjustDirection.UP;
+        } else if (CARCONTROL_SET_HORIZONTAL.equals(command.getIntentName())) {
+            direction = AdjustDirection.LEFT;
+        }
+        return direction;
+    }
+
+    private static boolean isUnifiedDirection(AdjustDirection direction) {
+        if (horizontalDirections.contains(direction) && !directionUnifiedHorizontal) {
+            return false;
+        } else if (verticalDirections.contains(direction) && !directionUnifiedVertical) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 解析调节数值
+     */
+    private static int parseValue(VhsCarControlInfo vhsBean) {
+        CommandBean command = vhsBean.getCommand();
+        AdjustDirection direction = vhsBean.getDirection();
+        int result = parseMaxValue(vhsBean);
+        if (result == INVALID_NUMBER) {
+            result = parseSpecificValue(vhsBean);
+        }
+        if (absoluteAdjustIntentNames.contains(command.getIntentName())) {
+            if (!zoneDirectionConsistencyHorizontal && vhsBean.getZoneId() == MirrorZone.RIGHT && horizontalDirections.contains(direction)) {
+                result = MIRROR_ADJUST_MAX_VALUE - result;
+            }
+        }
+        return result >= 0 ? result : INVALID_NUMBER;
+    }
+
+    private static int parseMaxValue(VhsCarControlInfo vhsBean) {
+        CommandMessageBean message = vhsBean.getMessage();
+        AdjustDirection direction = vhsBean.getDirection();
+        MirrorZone zoneId = vhsBean.getZoneId();
+        String southIntentName = message.getIntentName();
+        int result = INVALID_NUMBER;
+        if (MultiModalCarControlConstant.getCarControlSouthMaxIntentNameList().contains(southIntentName)) {
+            vhsBean.setBorderRetcode(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN);
+            return isUnifiedDirection(direction) ? MIRROR_ADJUST_MAX_VALUE : MIRROR_ADJUST_MIN_VALUE;
+        } else if (MultiModalCarControlConstant.getCarControlSouthMinIntentNameList().contains(southIntentName)) {
+            vhsBean.setBorderRetcode(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX);
+            return isUnifiedDirection(direction) ? MIRROR_ADJUST_MIN_VALUE : MIRROR_ADJUST_MAX_VALUE;
+        } else if (MultiModalCarControlConstant.SET_HORIZONTAL_MAX.equals(southIntentName)) {
+            return direction == AdjustDirection.RIGHT ? MIRROR_ADJUST_MIN_VALUE : MIRROR_ADJUST_MAX_VALUE;
+        } else if (MultiModalCarControlConstant.SET_HORIZONTAL_MAX_INWARD.equals(southIntentName)) {
+            vhsBean.setBorderRetcode(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN);
+            result = (zoneId == MirrorZone.LEFT) ? MIRROR_ADJUST_MAX_VALUE : MIRROR_ADJUST_MIN_VALUE;
+            if (isUnifiedDirection(direction)) {
+                result = MIRROR_ADJUST_MAX_VALUE - result;
+            }
+        } else if (MultiModalCarControlConstant.SET_HORIZONTAL_MAX_OUTWARD.equals(southIntentName)) {
+            vhsBean.setBorderRetcode(MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX);
+            result = (zoneId == MirrorZone.RIGHT) ? MIRROR_ADJUST_MAX_VALUE : MIRROR_ADJUST_MIN_VALUE;
+            if (isUnifiedDirection(direction)) {
+                result = MIRROR_ADJUST_MAX_VALUE - result;
+            }
+        }
+        return result;
+    }
+
+    private static int parseSpecificValue(VhsCarControlInfo vhsBean) {
+        CommandBean command = vhsBean.getCommand();
+        CommandMessageBean message = vhsBean.getMessage();
+        AdjustDirection direction = vhsBean.getDirection();
+        JsonObject params = message.getParameters();
+        int number = INVALID_NUMBER;
+        int unit = Unit.NONE;
+        if (params.has("value")) {
+            try {
+                unit = (int) Float.parseFloat(params.get("value").getAsJsonObject().get("unit").getAsString());
+                number = (int) Float.parseFloat(params.get("value").getAsJsonObject().get("number").getAsString());
+            } catch (NumberFormatException | IllegalStateException e) {
+                LogUtil.warn(TAG, "parse value fail: " + e.getMessage());
+            }
+        }
+        if (number == INVALID_NUMBER) {
+            command.getResult().setFailureType(ReplyConstant.FailureType.INVALID_VALUE_UNIT);
+            LogUtil.warn(TAG, "deal absolute mirror adjust fail, invalid number");
+        }
+        if (unit == Unit.PERCENT || unit == Unit.NONE) {
+            if (horizontalDirections.contains(direction) && !directionUnifiedHorizontal && CARCONTROL_SET_HORIZONTAL.equals(command.getIntentName())) {
+                number = MIRROR_ADJUST_MAX_VALUE - number;
+            } else if (verticalDirections.contains(direction) && !directionUnifiedHorizontal && CARCONTROL_SET_HORIZONTAL.equals(command.getIntentName())) {
+                number = MIRROR_ADJUST_MAX_VALUE - number;
+            }
+            if (unit == Unit.PERCENT) {
+                return (int) Math.ceil(number * ((float) (MIRROR_ADJUST_MAX_VALUE - toleranceRight - toleranceLeft) / MIRROR_ADJUST_MAX_VALUE));
+            }
+            return number;
+        } else if (unit == Unit.NO_VALUE_NO_UNIT) {
+            return mirrorAdjustStep;
+        }
+        return INVALID_NUMBER;
+    }
+
+    /**
+     * 执行后视镜位置微调
+     */
+    private static void performVhsAdjust(VhsCarControlInfo vhsBean) {
+        ReplyBean replyBean = vhsBean.getResult();
+        MirrorControlManager.AdjustDirection direction = vhsBean.getDirection();
+        if (direction == MirrorControlManager.AdjustDirection.INVALID) {
+            LogUtil.warn(TAG, "performVhsAdjust invalid direction: " + direction);
+            replyBean.setRetCode(String.valueOf(ReplyConstant.RetCode.EXCEPTION));
+            return;
+        }
+        int number = vhsBean.getNumber();
+        if (number == INVALID_NUMBER) {
+            LogUtil.warn(TAG, "performVhsAdjust invalid NUMBER: " + direction);
+            replyBean.setRetCode(String.valueOf(ReplyConstant.RetCode.EXCEPTION));
+            return;
+        }
+        MirrorZone zoneId = vhsBean.getZoneId();
+        if (zoneId == null) {
+            LogUtil.warn(TAG, "performVhsAdjust zoneId: " + direction);
+            replyBean.setRetCode(String.valueOf(ReplyConstant.RetCode.EXCEPTION));
+            return;
+        }
+        CommandBean command = vhsBean.getCommand();
+        if (absoluteAdjustIntentNames.contains(command.getIntentName())) {
+            mirrorAdjustAbsolute(vhsBean);
+        } else {
+            mirrorAdjustRelative(vhsBean);
+        }
+    }
+
+    /**
+     * 执行调整后视镜 相对位置
+     */
+    private static void mirrorAdjustRelative(VhsCarControlInfo vhsBean) {
+        int current = 0;
+        int target = 0;
+        int adjustKey = 0;
+        int step = vhsBean.getNumber();
+        AdjustDirection direction = vhsBean.getDirection();
+        MirrorZone zoneId = vhsBean.getZoneId();
+        int tolerance = valueLimited ? toleranceMap.getOrDefault(direction, 0) : 0;
+        try {
+            switch (direction) {
+                case UP:
+                case DOWN:
+                    current = MirrorManager.getInstance().getSideMirrorYPosition(zoneId);
+                    if (direction == AdjustDirection.DOWN) {
+                        target = Math.max(MIRROR_ADJUST_MIN_VALUE + tolerance, current - step);
+                    } else {
+                        target = Math.min(MIRROR_ADJUST_MAX_VALUE - tolerance, current + step);
+                    }
+                    MirrorManager.getInstance().setSideMirrorYPosition(zoneId, target, setCallback);
+                    adjustKey = (zoneId == MirrorZone.LEFT) ? MIRROR_LEFT_Y : MIRROR_RIGHT_Y;
+                    break;
+                case LEFT:
+                case RIGHT:
+                    current = MirrorManager.getInstance().getSideMirrorXPosition(zoneId);
+                    if (direction == AdjustDirection.LEFT) {
+                        target = Math.min(MIRROR_ADJUST_MAX_VALUE - tolerance, current + step);
+                    } else {
+                        target = Math.max(MIRROR_ADJUST_MIN_VALUE + tolerance, current - step);
+                    }
+                    MirrorManager.getInstance().setSideMirrorXPosition(zoneId, target, setCallback);
+                    adjustKey = (zoneId == MirrorZone.LEFT) ? MIRROR_LEFT_X : MIRROR_RIGHT_X;
+                    break;
+                default:
+                    break;
+            }
+            LogUtil.info(TAG, "[mirrorAdjustRelative] zoneId=" + zoneId + "direction=" + direction + ", current=" + current + ", target=" + target);
+            vhsBean.chainingCurrent(current).chainingTarget(target).chainingAdjustKey(adjustKey);
+            mirrorAngleSynchronization(vhsBean);
+            MsgReport.getComposerKeyMsgReporter().reportSendCustomActionToDte("mirrorAdjustRelative", zoneId.toString() + "#" + direction + "#" + current + "#" + target);
+        } catch (VehicleServiceException | RemoteException ex) {
+            MsgReport.getComposerKeyMsgReporter().reportRemoteException("VHS adjust call exception: " + ex.getMessage());
+            LogUtil.error(TAG, "[mirrorAdjustRelative] VHS adjust call exception: " + ex);
+            vhsBean.getResult().setRetCode(String.valueOf(ReplyConstant.RetCode.EXCEPTION));
+            return;
+        }
+        fillReplyBean(vhsBean);
+    }
+
+    /**
+     * 执行调整后视镜 绝对位置
+     */
+    private static void mirrorAdjustAbsolute(VhsCarControlInfo vhsBean) {
+        int current = 0;
+        int target = vhsBean.getNumber();
+        int adjustKey = 0;
+        AdjustDirection direction = vhsBean.getDirection();
+        MirrorZone zoneId = vhsBean.getZoneId();
+        int tolerance = valueLimited ? toleranceMap.getOrDefault(direction, 0) : 0;
+        target = Math.min(MIRROR_ADJUST_MAX_VALUE - tolerance, Math.max(MIRROR_ADJUST_MIN_VALUE + tolerance, target));
+        try {
+            switch (direction) {
+                case UP:
+                case DOWN:
+                    current = MirrorManager.getInstance().getSideMirrorYPosition(zoneId);
+                    MirrorManager.getInstance().setSideMirrorYPosition(zoneId, target, setCallback);
+                    adjustKey = (zoneId == MirrorZone.LEFT) ? MIRROR_LEFT_Y : MIRROR_RIGHT_Y;
+                    break;
+                case LEFT:
+                case RIGHT:
+                    current = MirrorManager.getInstance().getSideMirrorXPosition(zoneId);
+                    MirrorManager.getInstance().setSideMirrorXPosition(zoneId, target, setCallback);
+                    adjustKey = (zoneId == MirrorZone.LEFT) ? MIRROR_LEFT_X : MIRROR_RIGHT_X;
+                    break;
+                default:
+                    break;
+            }
+            LogUtil.info(TAG, "[mirrorAdjustRelative] zoneId=" + zoneId + "direction=" + direction + ", current=" + current + ", target=" + target);
+            vhsBean.chainingCurrent(current).chainingTarget(target).chainingAdjustKey(adjustKey);
+            mirrorAngleSynchronization(vhsBean);
+            MsgReport.getComposerKeyMsgReporter().reportSendCustomActionToDte("mirrorAdjustAbsolute", zoneId.toString() + "#" + direction + "#" + current + "#" + target);
+        } catch (VehicleServiceException | RemoteException ex) {
+            MsgReport.getComposerKeyMsgReporter().reportRemoteException("VHS adjust call exception: " + ex.getMessage());
+            LogUtil.error(TAG, "[mirrorAdjustAbsolute] VHS adjust call exception: " + ex);
+            vhsBean.getResult().setRetCode(String.valueOf(ReplyConstant.RetCode.EXCEPTION));
+            return;
+        }
+        fillReplyBean(vhsBean);
+    }
+
+    /**
+     * 同步后视镜角度至车控，保存至用户账户下
+     */
+    public static void mirrorAngleSynchronization(VhsCarControlInfo vhsBean) {
+        try {
+            int[] mirrorAngles = {MirrorManager.getInstance().getSideMirrorXPosition(MirrorZone.LEFT),
+                    MirrorManager.getInstance().getSideMirrorYPosition(MirrorZone.LEFT),
+                    MirrorManager.getInstance().getSideMirrorXPosition(MirrorZone.RIGHT),
+                    MirrorManager.getInstance().getSideMirrorYPosition(MirrorZone.RIGHT)};
+            int adjustKey = vhsBean.getAdjustKey();
+            adjustKeyAndTargetMap.put(adjustKey, vhsBean.getTarget());
+            for (int key : adjustKeyAndTargetMap.keySet()) {
+                mirrorAngles[key] = adjustKeyAndTargetMap.get(key);
+            }
+            int currentUserId = ActivityManagerEx.getCurrentUser();
+            ContentResolver contentResolver = ContextUtil.getAppContext().getContentResolver();
+            if (contentResolver == null) {
+                LogUtil.error(TAG, "mirrorAngleSynchronization: ContentResolver == null");
+                return;
+            }
+            Uri uri = Uri.parse(USER_MIRROR_SAVE_URI);
+            uri = ContentProviderEx.maybeAddUserId(uri, currentUserId);
+            ContentValues values = new ContentValues();
+            values.put(CAR_CONTROL_LEFT_X, mirrorAngles[MIRROR_LEFT_X]);
+            values.put(CAR_CONTROL_LEFT_Y, mirrorAngles[MIRROR_LEFT_Y]);
+            values.put(CAR_CONTROL_RIGHT_X, mirrorAngles[MIRROR_RIGHT_X]);
+            values.put(CAR_CONTROL_RIGHT_Y, mirrorAngles[MIRROR_RIGHT_Y]);
+            Cursor cursor = contentResolver.query(uri, null, null, null, null);
+            if (cursor.getCount() > 0) {
+                contentResolver.update(uri, values, null, null);
+            } else {
+                contentResolver.insert(uri, values);
+                LogUtil.info(TAG, "mirrorAngleSynchronization no count, try insert");
+            }
+            cursor.close();
+            LogUtil.info(TAG, "mirrorAngleSynchronization update: values = " + Arrays.toString(mirrorAngles) + ", uid = " + currentUserId);
+            if (parallelSignal) {
+                MirrorManager.getInstance().setSideMirrorXPosition(MirrorZone.LEFT, mirrorAngles[MIRROR_LEFT_X], setCallback);
+                MirrorManager.getInstance().setSideMirrorYPosition(MirrorZone.LEFT, mirrorAngles[MIRROR_LEFT_Y], setCallback);
+                MirrorManager.getInstance().setSideMirrorXPosition(MirrorZone.RIGHT, mirrorAngles[MIRROR_RIGHT_X], setCallback);
+                MirrorManager.getInstance().setSideMirrorYPosition(MirrorZone.RIGHT, mirrorAngles[MIRROR_RIGHT_Y], setCallback);
+                LogUtil.info(TAG, "parallelSignal sent: values = ");
+            }
+        } catch (Exception e) {
+            LogUtil.error(TAG, "mirrorAngleSynchronization Error: " + e.getMessage());
+        }
+    }
+
+
+    private static void fillReplyBean(VhsCarControlInfo vhsBean) {
+        AdjustDirection direction = vhsBean.getDirection();
+        // 后视镜各车型坐标轴方向定义不同，需要根据配置文件进行取反
+        String retCode = figureOutMirrorControlAdjustRetCode(vhsBean);
+        if (vhsBean.getZoneId() == MirrorZone.RIGHT && horizontalDirections.contains(direction) && !zoneDirectionConsistencyHorizontal) {
+            retCode = oppositeRetCodeMap.getOrDefault(retCode, retCode);
+        }
+        if (horizontalDirections.contains(direction) && !directionUnifiedHorizontal) {
+            retCode = oppositeRetCodeMap.getOrDefault(retCode, retCode);
+        } else if (verticalDirections.contains(direction) && !directionUnifiedVertical) {
+            retCode = oppositeRetCodeMap.getOrDefault(retCode, retCode);
+        }
+        if (vhsBean.getIsBorderScene() && !StringUtils.isEmpty(vhsBean.getBorderRetcode())) {
+            retCode = vhsBean.getBorderRetcode();
+        }
+        vhsBean.getResult().setRetCode(retCode);
+        JsonObject responseDataJson = new JsonObject();
+        vhsBean.getResult().setResponseData(responseDataJson.toString());
+    }
+
+    private static String figureOutMirrorControlAdjustRetCode(VhsCarControlInfo vhsBean) {
+        AdjustDirection direction = vhsBean.getDirection();
+        int current = vhsBean.getCurrent();
+        int target = vhsBean.getTarget();
+        // 后视镜实际调节时，各车型可用范围不同，在边界判断时需要增加容差
+        int tolerance = toleranceMap.get(direction) + mirrorAdjustMinimumStep;
+        String retCode = String.valueOf(ReplyConstant.RetCode.SUCCESS);
+        if (direction == AdjustDirection.DOWN && current <= MIRROR_ADJUST_MIN_VALUE + tolerance && target <= MIRROR_ADJUST_MIN_VALUE + tolerance) {
+            retCode = MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX;
+        } else if (direction == AdjustDirection.UP && current >= MIRROR_ADJUST_MAX_VALUE - tolerance && target >= MIRROR_ADJUST_MAX_VALUE - tolerance) {
+            retCode = MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN;
+        } else if (current <= MIRROR_ADJUST_MIN_VALUE + tolerance && target <= MIRROR_ADJUST_MIN_VALUE + tolerance) {
+            vhsBean.setIsBorderScene(true);
+            if (direction == AdjustDirection.RIGHT) {
+                retCode = MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MAX;
+            }
+        } else if (current >= MIRROR_ADJUST_MAX_VALUE - tolerance && target >= MIRROR_ADJUST_MAX_VALUE - tolerance) {
+            vhsBean.setIsBorderScene(true);
+            if (direction == AdjustDirection.LEFT) {
+                retCode = MultiModalCarControlConstant.REAR_VIEW_MIRROR_RETCODE_MIN;
+            }
+        } else if (Math.abs(current - target) <= mirrorAdjustMinimumStep) {
+            retCode = String.valueOf(ReplyConstant.RetCode.EXPECTED);
+        }
+        return retCode;
+    }
+
+    MirrorControlManager() {
+        if (!RearviewManagement.isSupportedElectronicRearview()){
+            zoneDirectionConsistencyHorizontal = VhsConfig.getInstance().
+                    getMirrorControlConfigBoolean(VhsConfig.REAR_VIEW_MIRROR_ZONE_DIRECTION_CONSISTENCY_HORIZONTAL);
+            directionUnifiedVertical = VhsConfig.getInstance().
+                    getMirrorControlConfigBoolean(VhsConfig.REAR_VIEW_MIRROR_DIRECTION_UNIFIED_VERTICAL);
+            directionUnifiedHorizontal = VhsConfig.getInstance().
+                    getMirrorControlConfigBoolean(VhsConfig.REAR_VIEW_MIRROR_DIRECTION_UNIFIED_HORIZONTAL);
+            valueLimited = VhsConfig.getInstance().
+                    getMirrorControlConfigBoolean(VhsConfig.REAR_VIEW_MIRROR_VALUE_LIMITED);
+            toleranceUp = VhsConfig.getInstance().getMirrorControlRange(VhsConfig.MIRROR_CONTROL_UP_TOLERANCE);
+            toleranceDown = VhsConfig.getInstance().getMirrorControlRange(VhsConfig.MIRROR_CONTROL_DOWN_TOLERANCE);
+            toleranceLeft = VhsConfig.getInstance().getMirrorControlRange(VhsConfig.MIRROR_CONTROL_LEFT_TOLERANCE);
+            toleranceRight = VhsConfig.getInstance().getMirrorControlRange(VhsConfig.MIRROR_CONTROL_RIGHT_TOLERANCE);
+            mirrorAdjustStep = VhsConfig.getInstance().getMirrorControlConfigInt(VhsConfig.REAR_VIEW_MIRROR_ADJUST_STEP);
+            mirrorAdjustMinimumStep = VhsConfig.getInstance().getMirrorControlConfigInt(VhsConfig.REAR_VIEW_MIRROR_ADJUST_MINIMUM_STEP);
+            XYNormalize = VhsConfig.getInstance().getMirrorControlConfigBoolean(VhsConfig.REAR_VIEW_MIRROR_XY_NORMALIZE);
+            parallelSignal = VhsConfig.getInstance().getMirrorControlConfigBoolean(VhsConfig.REAR_VIEW_MIRROR_PARALLEL_SIGNAL);
+        }
+    }
+
+    /**
+     * 获取档位状态
+     *
+     * @return 获取档位状态
+     */
+    public Integer getTransmissionGear() {
+        if (transmissionGear == null) {
+            transmissionGear = SaManagerUtils.getTransmissionGear();
+        }
+        return transmissionGear;
+    }
+
+    /**
+     * 调整方向
+     */
+    public enum AdjustDirection {
+        INVALID,
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    }
+
+    private static class SingletonHolder {
+        private static final MirrorControlManager INSTANCE = new MirrorControlManager();
+    }
+}
