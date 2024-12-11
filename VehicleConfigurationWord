@@ -1,0 +1,95 @@
+public class VehicleConfigurationWord {
+    private static final String TAG = "VehicleConfigurationWord";
+    private static byte[] configurationWords = null;
+    private static boolean isInited = false;
+    private static int signalBufferLength = 0;
+    private static final int MIN_OFFSET = 0;
+    private static final int MAX_OFFSET = 7;
+    private static final int MIN_INDEX = 0;
+    private static final int BYTE_FULL_MASK = 255;
+    private static final int SIGNAL_BUFFER_LENGTH_DEFAULT = 32;
+    private static final int CFG_WORD_SIGNAL = 1;
+    private static final String PROPERTY_ID = "VehicleIdentification_ConfigurationWord";
+
+    private VehicleConfigurationWord() {
+    }
+
+    private static synchronized void initConfigurationWordsByCdm() throws InterruptedException, IllegalArgumentException, RemoteException, UnsupportedOperationException {
+        LogUtils.info("VehicleConfigurationWord", "Enter New method initConfigurationWordsByCDM.");
+
+        try {
+            configurationWords = CdmManager.getInstance().getVehicleInfo(1);
+        } catch (com.huawei.hosauto.cdm.RemoteException var4) {
+            LogUtils.error("VehicleConfigurationWord", "Get CdmManager RemoteException." + var4.getMessage());
+        }
+
+        if (configurationWords == null || configurationWords.length == 0) {
+            LogUtils.info("VehicleConfigurationWord", "Get CdmManager failed Switch to use IVI.");
+            int bufferSize = signalBufferLength > 0 ? signalBufferLength : 32;
+            byte[] request = new byte[bufferSize];
+
+            try {
+                Vehicle.connectSync(VehicleServiceName.VEHICLECONTROL_SERVICE);
+                configurationWords = VehicleCabinManager.getVehicleBufferSignal("VehicleIdentification_ConfigurationWord", 0, request);
+            } catch (RemoteException | IllegalStateException | IllegalArgumentException var3) {
+                LogUtils.error("VehicleConfigurationWord", "The service is connecting or is already connected!" + var3.getMessage());
+            }
+        }
+
+        LogUtils.info("VehicleConfigurationWord", "Call CDM or IVI method:" + Arrays.toString(configurationWords));
+    }
+
+    public static synchronized byte[] getVehicleConfigurationWords() {
+        try {
+            if (!isInited) {
+                LogUtils.info("VehicleConfigurationWord", "Initializing , Please wait.");
+                XmlParseUtils.initConfigurationInfo();
+                isInited = true;
+            }
+
+            if (configurationWords == null || configurationWords.length < signalBufferLength) {
+                LogUtils.warn("VehicleConfigurationWord", "The configuration words is empty or the data is incorrect, Try again!");
+                initConfigurationWordsByCdm();
+            }
+        } catch (IllegalArgumentException | RemoteException | UnsupportedOperationException | InterruptedException var1) {
+            LogUtils.error("VehicleConfigurationWord", "initConfigurationWordsNew occur error: " + var1.getClass().getName());
+            configurationWords = null;
+        }
+
+        return configurationWords == null ? new byte[0] : (byte[])configurationWords.clone();
+    }
+
+    public static int getSingleConfigurationValue(String name) {
+        LogUtils.info("VehicleConfigurationWord", "getVehicleConfigurationValue: " + name);
+        byte[] cfgWords = getVehicleConfigurationWords();
+        VehicleConfigurationWordsInfo wordInfo = (VehicleConfigurationWordsInfo)XmlParseUtils.getConfigurationWordsInfoMap().get(name);
+        if (wordInfo == null) {
+            LogUtils.error("VehicleConfigurationWord", "Don't support : " + name + ", please check configuration xml.");
+            return Integer.MAX_VALUE;
+        } else {
+            int index;
+            if (cfgWords.length < signalBufferLength) {
+                index = wordInfo.getDefaultValue();
+                LogUtils.warn("VehicleConfigurationWord", "Not real configuration word! cfgWords length is " + cfgWords.length + ", signalBufferLength is " + signalBufferLength + ". Use default value " + index + " instead.");
+                return index;
+            } else {
+                index = wordInfo.getStartByte();
+                byte mask = wordInfo.getMask();
+                int offset = wordInfo.getStartBit();
+                if (index < cfgWords.length && index >= 0 && offset <= 7 && offset >= 0) {
+                    LogUtils.info("VehicleConfigurationWord", "getSingleConfigurationValue : length: " + cfgWords.length + " index: " + index + " mask: " + (mask & 255) + " offset: " + offset);
+                    return (cfgWords[index] & mask & 255) >> offset;
+                } else {
+                    int value = wordInfo.getDefaultValue();
+                    LogUtils.warn("VehicleConfigurationWord", "Out of bounds! Use default value " + value + " instead.");
+                    return value;
+                }
+            }
+        }
+    }
+
+    public static void setSignalBufferLength(int bufferLength) {
+        LogUtils.info("VehicleConfigurationWord", "setSignalBufferLength: " + bufferLength);
+        signalBufferLength = bufferLength > 0 ? bufferLength : 32;
+    }
+}
