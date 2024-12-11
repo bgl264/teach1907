@@ -1,0 +1,82 @@
+/**
+ * *ControlManager的工具类
+ *
+ * @author h30060440
+ * @since 2024/9/11
+ */
+public class ControlManagerUtil {
+    private static final String TAG = "ControlManagerUtil";
+
+    private static final String MODE = "mode";
+
+    private static final String DURATION = "duration";
+
+    private static final String NUMBER = "number";
+
+    /**
+     * 设置返回值和点位信息
+     *
+     * @param command     指令
+     * @param errorSource 点位码
+     * @param retCode     返回值
+     */
+    public static void setResult(CommandBean command, String errorSource, int retCode) {
+        command.getResult().addPropertyToResponseData(ERROR_SOURCE, errorSource);
+        command.getResult().setRetCode(retCode);
+    }
+
+    /**
+     * 解析param数值
+     *
+     * @param vhsCarControlInfo 车控信息
+     * @param param             参数
+     * @return 解析数值
+     */
+    public static JsonObject getParam(VhsCarControlInfo vhsCarControlInfo, String param) {
+        CommandMessageBean message = vhsCarControlInfo.getMessage();
+        JsonObject params = message.getParameters();
+        if (!params.has(param) || StringUtils.isEmpty(params.get(param).toString())) {
+            return null;
+        }
+        return params.get(param).getAsJsonObject();
+    }
+
+    /**
+     * 解析driveMode数值
+     *
+     * @param vhsCarControlInfo 车控信息
+     * @return 解析数值
+     */
+    public static int getDriveMode(VhsCarControlInfo vhsCarControlInfo) {
+        JsonObject jsonObject = getParam(vhsCarControlInfo, MODE);
+        if (jsonObject == null || !jsonObject.has(VALUE_KEY)) {
+            return INVALID_NUMBER;
+        }
+        try {
+            return jsonObject.get(VALUE_KEY).getAsInt();
+        } catch (NumberFormatException e) {
+            LogUtil.error(TAG, "getDurationNumber error: " + e.getMessage());
+        }
+        return INVALID_NUMBER;
+    }
+
+    /**
+     * 解析number数值
+     *
+     * @param vhsCarControlInfo 车控信息
+     * @return 解析数值
+     */
+    public static int getDurationNumber(VhsCarControlInfo vhsCarControlInfo) {
+        JsonObject jsonObject = getParam(vhsCarControlInfo, DURATION);
+        if (jsonObject == null || !jsonObject.has(NUMBER)) {
+            return INVALID_NUMBER;
+        }
+        try {
+            float num = jsonObject.get(NUMBER).getAsFloat();
+            return (int) num;
+        } catch (NumberFormatException e) {
+            LogUtil.error(TAG, "getDurationNumber error: " + e.getMessage());
+        }
+        return INVALID_NUMBER;
+    }
+}
