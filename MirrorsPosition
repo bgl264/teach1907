@@ -1,0 +1,45 @@
+public class MirrorsPosition {
+    public MirrorsPosition() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public MirrorsPosition setLeftPositionX(int position) {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getLeftPositionX() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public MirrorsPosition setLeftPositionY(int position) {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getLeftPositionY() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public MirrorsPosition setRightPositionX(int position) {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getRightPositionX() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public MirrorsPosition setRightPositionY(int position) {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getRightPositionY() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public byte[] encode() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void decode(byte[] bytes) {
+        throw new RuntimeException("Stub!");
+    }
+}
