@@ -1,0 +1,157 @@
+public class CmsManager {
+    CmsManager() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public static CmsManager getInstance() {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getAutoBrightnessSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeAutoBrightnessSwitch(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeAutoBrightnessSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setAutoBrightnessSwitch(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getBrightnessLevel(MirrorManager.MirrorZone zoneId) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeBrightnessLevel(MirrorManager.MirrorZone zoneId, IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeBrightnessLevel(MirrorManager.MirrorZone zoneId) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setBrightnessLevel(MirrorManager.MirrorZone zoneId, int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getAdjustable() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeAdjustable(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeAdjustable() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setAdjustmentStatus(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getTurnAssist() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeTurnAssist(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeTurnAssist() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setTurnAssist(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setReboot(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getHighSpeedViewSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeHighSpeedViewSwitch(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeHighSpeedViewSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setHighSpeedViewSwitch(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getHighSpeedViewThreshold() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeHighSpeedViewThreshold(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeHighSpeedViewThreshold() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setHighSpeedViewThreshold(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getAutoHeatingSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeAutoHeatingSwitch(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeAutoHeatingSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setAutoHeatingSwitch(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public int getReverseAssistSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribeReverseAssistSwitch(IntegerSubscribeCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribeReverseAssistSwitch() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setReverseAssistSwitch(int setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public MirrorsPosition getPosition() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void subscribePosition(MirrorsPositionCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void unsubscribePosition() throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+
+    public void setPosition(MirrorsPosition setValue, SetCallback callback) throws RemoteException, VehicleServiceException {
+        throw new RuntimeException("Stub!");
+    }
+}
